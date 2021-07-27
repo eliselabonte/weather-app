@@ -1,3 +1,121 @@
 :root   {
-    
+    --dark: rgb(51, 51, 51);
+    --grey: rgb(178, 178, 178);
+    --light:rgb(255, 255, 255);
+    --blue:rgb(63, 142, 191);
+    --green:rgb(184, 237, 155);
+    --yellow:rgb(253, 244, 124);
+    --orange: rgb(255, 202, 112);
+    --red:rgb(236, 135, 135);
+    --head-font:'Cormorant SC', serif;
+    --body-font:'Thasadith', sans-serif;
+}
+
+body   {
+    height:100vh;
+    overflow-y: hidden;
+    background-color: var(--blue);
+}
+
+main   {
+    height:100%;
+}
+
+header  {
+    width:100%;
+    background-color: var(--dark);
+}
+
+h1  {
+    color: var(--light);
+    font-family: var(--head-font);
+}
+
+h2, h3, p{
+    text-align:center;
+    font-family: var(--body-font);
+}
+
+h2  {
+    margin-bottom:15px;
+}
+
+h3  {
+    margin:5px;
+}
+
+li  {
+    list-style-type: none;
+    font-family: var(--body-font);
+    padding-top: 10px;
+}
+
+div.row {
+    height:90%;
+}
+
+p.uv-index  {
+    background-color: var(--green);
+    border-radius: 20px;
+    padding:5px;
+}
+
+aside.search-and-history, section.weather-display-container    {
+    display:flex;
+    flex-direction:column;
+    align-items: center;
+    justify-content: space-evenly;
+    margin:10px;
+}
+
+.card{
+    background-color: var(--grey);
+    border:2px solid var(--dark);
+    border-radius: 20px;
+}
+
+button, input  {
+    border:none;
+    border-radius: 20px;
+    font-family: var(--body-font);
+}
+
+button  {
+    background-color: var(--blue);
+}
+
+button:hover    {
+    background-color: var(--green);
+}
+
+div.past-city-section   {
+    height:60%;
+}
+
+h2.my-cities    {
+    border: 2px solid var(--dark);
+    border-radius: 20px;
+    padding:5px;
+}
+
+div.weather-day {
+    height:40vh;
+    border-left:2px solid var(--dark);
+    font-family: var(--body-font);
+}
+
+div.first-day   {
+    border-radius: 20px 0px 0px 20px;
+    border:none;
+}
+
+div.last-day   {
+    border-radius: 0px 20px 20px 0px;
+    border-left:2px solid var(--dark);
+}
+
+div.five-day-forecast   {
+    height:40vh;
+    margin-top:10px;
+    width:100%;
 }
