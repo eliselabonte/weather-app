@@ -1,5 +1,6 @@
 # weather-app
 A weather prediction application
+https://eliselabonte.github.io/weather-app/
 
 ![weather site screenshot](assets/weather_screenshot.png)
 

@@ -44,10 +44,11 @@ h3  {
     margin:5px;
 }
 
-li  {
+li, .past-city-list-item  {
     list-style-type: none;
     font-family: var(--body-font);
     padding-top: 10px;
+    text-transform: capitalize;
 }
 
 div.row {
@@ -58,6 +59,18 @@ p.uv-index  {
     background-color: var(--green);
     border-radius: 20px;
     padding:5px;
+}
+
+p.uv-index.favorable    {
+    background-color: var(--green);
+}
+
+p.uv-index.moderate    {
+    background-color: var(--yellow);
+}
+
+p.uv-index.severe    {
+    background-color: var(--red);
 }
 
 aside.search-and-history, section.weather-display-container    {
@@ -118,4 +131,8 @@ div.five-day-forecast   {
     height:40vh;
     margin-top:10px;
     width:100%;
+}
+
+h3.city-name    {
+    text-transform: capitalize;
 }

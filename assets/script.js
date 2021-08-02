@@ -14,39 +14,212 @@ $(document).ready(function () {
     const $dayThreeWeather = $('#dayThree');
     const $dayFourWeather = $('#dayFour');
     const $dayFiveWeather = $('#dayFive');
+
+    let currentDay = dayjs();
     
     const apiKey = "d2a2cad4f1d38ef0dfacee769aba90c6";
-    
-    console.log($searchByCity)
-;            // populate page with weather data on submit
+
+    // functions for accessing local storage
+    function parseThis(thing)   {
+        return JSON.parse(thing);
+    };
+
+    function stringifyThis(thing)   {
+        return JSON.stringify(thing);
+    };
+
+    function getStorage(item)   {
+        return localStorage.getItem(item);
+    };
+
+    function setStorage(key, value)    {
+        return localStorage.setItem(key, value)
+    };
+
+
+    // show previously searched cities in the past city list
+    function displayPastCities(city, i)    {
+        if (i<3)    {
+            const newCity = $('<li>').addClass('past-city-list-item');
+            newCity.text(city);
+            $pastCityList.append(newCity);
+        }
+    };
+
+
+    // populate page with weather data on submit
     $searchSubmitButton.click(function()  {
             const city = $searchByCity.val();
-            console.log(city);
-            getCity(city);
-        })    
-    
-        // need a function here to display past searches
-    
-        function displayPastCities()    {
-            const city = $('p');
-    
-            
-            $pastCityList.append(city);
-        }
-        // utilize local storage
-        // on load, display data from Boston or something
-        // create elements to populate 5-day forecast items
+            const stringifiedCity = stringifyThis(city);
 
-        function getCity(city)  {
+            $cityName.text(city);
 
-            fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${apiKey}`)
-            .then(function(response)    {
-                return response.json();
-            })
-            .then(function(data)    {
-                console.log(data);
-            })
+            getCity(city)
+
+            // cities from storage is the storage item 'pastCities'
+            const citiesFromStorage = localStorage.getItem('pastCities');
+
+            if (city)   {
+
+                if (!citiesFromStorage) {
+                    displayPastCities(stringifiedCity, 0)
+                    setStorage('pastCities', `[${stringifiedCity}]`);
+                }
+
+                else {
+                    // parse those items from localStorage
+                    const storedCity = getStorage('pastCities');
+                    const parsedCitiesFromStorage = parseThis(storedCity);
+
+                    // add the entered city to the list
+                    const newParsedList = [city, ...parsedCitiesFromStorage];
+                    const newStringifiedList = stringifyThis(newParsedList);
+
+                    setStorage('pastCities', newStringifiedList);
+
+                    parsedCitiesFromStorage.forEach(displayPastCities);
+                }
+            }
+    });    
+
+    function displayCurrentWeather(allWeather)   {
+        const weather = allWeather.weather[0].description;
+        const temp = (allWeather.temp - 273).toFixed(0);
+        const humidity = allWeather.humidity;
+        const windspeed = allWeather.wind_speed;
+        const uvIndex = allWeather.uvi;
+
+        $weatherDescription.text(weather.toUpperCase());
+        $temperature.text(temp + "°C");
+        $humidity.text("Humidity: " + humidity + "%");
+        $windspeed.text("Windspeed: " + windspeed + "kmph");
+        $uvIndex.text("UVI: " + uvIndex);
+
+        if (uvIndex === 0)  {
+            $uvIndex.text("no UVI data");
         }
+        else if (uvIndex < 4)   {
+            $uvIndex.removeClass("moderate")
+            $uvIndex.removeClass("severe")
+            $uvIndex.addClass("favorable")
+        }
+        else if (uvIndex < 8)   {
+            $uvIndex.removeClass("favorable")
+            $uvIndex.removeClass("severe")
+            $uvIndex.addClass("moderate")
+        }
+        else    {
+            $uvIndex.removeClass("favorable")
+            $uvIndex.removeClass("moderate")
+            $uvIndex.addClass("severe")
+        } 
+    }
+
+    function displayForecast(allForecastData)  {
+        const dayOne = allForecastData[0];
+        const dayTwo = allForecastData[1];
+        const dayThree = allForecastData[2];
+        const dayFour = allForecastData[3];
+        const dayFive = allForecastData[4];
+
+        const dayOneUnformatted = currentDay + 1;
+        // const dayTwoDate = dateFormat(currentDay + 2);
+        // const dayThreeDate = dateFormat(currentDay + 3);
+        // const dayFourDate = dateFormat(currentDay + 4);
+        // const dayFiveDate = dateFormat(currentDay + 5);
+
+        // const dayOneFormatted = dayOneUnformatted.format('MMMM DD, YYYY');  
+
+        // dayOne display
+        let fcweather = dayOne.weather[0].description;
+        let fctemp = (dayOne.temp.day - 273).toFixed(0);
+
+        // const $dayOneDateDisplay = $("<h3>").text(dayOneDate);.append($dayOneDateDisplay)
+        const $dayOneWeatherDisplay = $("<p>").text(fcweather);
+        const $dayOneTempDisplay = $("<p>").text(fctemp);
+
+        $dayOneWeather.append($dayOneWeatherDisplay).append($dayOneTempDisplay);
+
+        // dayTwo display
+        fcweather = dayTwo.weather[0].description;
+        fctemp = (dayTwo.temp.day - 273).toFixed(0);
+        const $dayTwoWeatherDisplay = $("<p>").text(fcweather);
+        const $dayTwoTempDisplay = $("<p>").text(fctemp);
+
+        $dayTwoWeather.append($dayTwoWeatherDisplay).append($dayTwoTempDisplay);
+
+        // dayThree display
+        fcweather = dayThree.weather[0].description;
+        fctemp = (dayThree.temp.day - 273).toFixed(0);
+        const $dayThreeWeatherDisplay = $("<p>").text(fcweather);
+        const $dayThreeTempDisplay = $("<p>").text(fctemp);
+
+        $dayThreeWeather.append($dayThreeWeatherDisplay).append($dayThreeTempDisplay);
+
+        // dayFour display
+        fcweather = dayFour.weather[0].description;
+        fctemp = (dayFour.temp.day - 273).toFixed(0);
+        const $dayFourWeatherDisplay = $("<p>").text(fcweather);
+        const $dayFourTempDisplay = $("<p>").text(fctemp);
+
+        $dayFourWeather.append($dayFourWeatherDisplay).append($dayFourTempDisplay);
+
+        // dayFive display
+        fcweather = dayFive.weather[0].description;
+        fctemp = (dayFive.temp.day - 273).toFixed(0);
+        const $dayFiveWeatherDisplay = $("<p>").text(fcweather);
+        const $dayFiveTempDisplay = $("<p>").text(fctemp);
+
+        $dayFiveWeather.append($dayFiveWeatherDisplay).append($dayFiveTempDisplay);
+        
+
+    }
+
+
+    
+    function getWeather(lat, long)  {
+        console.log(lat, long)
+
+        fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lat}&exclude={part}&appid=${apiKey}`)
+        .then(function(response)    {
+            return response.json();
+        })
+        .then(function (data) {
+            console.log(data);
+            const currentWeather = data.current;
+            const forecast = data.daily;
+            displayCurrentWeather(currentWeather);
+            displayForecast(forecast);
+
+        })
+    }
+
+    function getCity(city)  {
+
+        fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${apiKey}&units={metric}`)
+        .then(function(response)    {
+            return response.json();
+        })
+        .then(function(data)    {
+            const latitude = data[0].lat;
+            const longitude = data[0].lon;
+            console.log(data)
+
+            getWeather(latitude, longitude)
+        })
+    }
+
+    function displayDate()   {
+        currentDay = dayjs();
+        const day = currentDay.format('dddd MMMM DD, YYYY');
+
+        $todayDate.text(day);
+
+    }
+
+    displayDate();
+
+    displayPastCities();
 
 });
 
