@@ -14,28 +14,67 @@ $(document).ready(function () {
     const $dayThreeWeather = $('#dayThree');
     const $dayFourWeather = $('#dayFour');
     const $dayFiveWeather = $('#dayFive');
+    const storedCity = getStorage('pastCities');
+    const parsedCitiesFromStorage = parseThis(storedCity)
 
     let currentDay = dayjs();
     
     const apiKey = "d2a2cad4f1d38ef0dfacee769aba90c6";
-
+    
     // functions for accessing local storage
     function parseThis(thing)   {
         return JSON.parse(thing);
     };
-
+    
     function stringifyThis(thing)   {
         return JSON.stringify(thing);
     };
-
+    
     function getStorage(item)   {
         return localStorage.getItem(item);
     };
-
+    
     function setStorage(key, value)    {
         return localStorage.setItem(key, value)
     };
+    
+    function getWeather(lat, long)  {
+        console.log(lat, long)
 
+        fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lat}&exclude={part}&appid=${apiKey}`)
+        .then(function(response)    {
+            return response.json();
+        })
+        .then(function (data) {
+            console.log(data);
+            const currentWeather = data.current;
+            const forecast = data.daily;
+            displayCurrentWeather(currentWeather);
+            displayForecast(forecast);
+        })
+    }
+
+    function getCity(city)  {
+
+        fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${apiKey}&units={metric}`)
+        .then(function(response)    {
+            return response.json();
+        })
+        .then(function(data)    {
+            const latitude = data[0].lat;
+            const longitude = data[0].lon;
+            console.log(data)
+
+            getWeather(latitude, longitude)
+        })
+    }
+
+    function displayDate()   {
+        currentDay = dayjs();
+        const day = currentDay.format('dddd MMMM DD, YYYY');
+
+        $todayDate.text(day);
+    }
 
     // show previously searched cities in the past city list
     function displayPastCities(city, i)    {
@@ -53,23 +92,22 @@ $(document).ready(function () {
             const stringifiedCity = stringifyThis(city);
 
             $cityName.text(city);
-
-            getCity(city)
-
+            
             // cities from storage is the storage item 'pastCities'
             const citiesFromStorage = localStorage.getItem('pastCities');
-
+            
             if (city)   {
+                
+                getCity(city)
 
                 if (!citiesFromStorage) {
-                    displayPastCities(stringifiedCity, 0)
                     setStorage('pastCities', `[${stringifiedCity}]`);
                 }
 
                 else {
                     // parse those items from localStorage
-                    const storedCity = getStorage('pastCities');
-                    const parsedCitiesFromStorage = parseThis(storedCity);
+                    storedCity = getStorage('pastCities');
+                    parsedCitiesFromStorage = parseThis(storedCity);
 
                     // add the entered city to the list
                     const newParsedList = [city, ...parsedCitiesFromStorage];
@@ -79,6 +117,9 @@ $(document).ready(function () {
 
                     parsedCitiesFromStorage.forEach(displayPastCities);
                 }
+            }
+            else    {
+                window.alert('Please enter a city.')
             }
     });    
 
@@ -175,51 +216,27 @@ $(document).ready(function () {
 
     }
 
+    function displayMostRecentSearchOnLoad()    {
+        const mostRecentSearchedCity = parsedCitiesFromStorage[0]
 
-    
-    function getWeather(lat, long)  {
-        console.log(lat, long)
-
-        fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lat}&exclude={part}&appid=${apiKey}`)
-        .then(function(response)    {
-            return response.json();
-        })
-        .then(function (data) {
-            console.log(data);
-            const currentWeather = data.current;
-            const forecast = data.daily;
-            displayCurrentWeather(currentWeather);
-            displayForecast(forecast);
-
-        })
+        getCity(mostRecentSearchedCity);
     }
 
-    function getCity(city)  {
+    $pastCityList.click(function(e)  {
+        const thingClicked = e.target;
 
-        fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${apiKey}&units={metric}`)
-        .then(function(response)    {
-            return response.json();
-        })
-        .then(function(data)    {
-            const latitude = data[0].lat;
-            const longitude = data[0].lon;
-            console.log(data)
-
-            getWeather(latitude, longitude)
-        })
-    }
-
-    function displayDate()   {
-        currentDay = dayjs();
-        const day = currentDay.format('dddd MMMM DD, YYYY');
-
-        $todayDate.text(day);
-
-    }
+        if  (thingClicked.matches('li'))    {
+            const pastCitySelected = thingClicked.val();
+            getCity(pastCitySelected);
+        }
+    })
 
     displayDate();
 
-    displayPastCities();
+    // this function works, but don't turn it on until deploy (limit api pulls)
+    // displayMostRecentSearchOnLoad()
+
+    parsedCitiesFromStorage.forEach(displayPastCities);
 
 });
 
