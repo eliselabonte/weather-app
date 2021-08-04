@@ -14,10 +14,11 @@ $(document).ready(function () {
     const $dayThreeWeather = $('#dayThree');
     const $dayFourWeather = $('#dayFour');
     const $dayFiveWeather = $('#dayFive');
-    const storedCity = getStorage('pastCities');
-    const parsedCitiesFromStorage = parseThis(storedCity)
+    let storedCity = getStorage('pastCities');
+    let parsedCitiesFromStorage = parseThis(storedCity)
 
     let currentDay = dayjs();
+    // dayjs.extend(window.dayjs_plugin_utc);
     
     const apiKey = "d2a2cad4f1d38ef0dfacee769aba90c6";
     
@@ -41,7 +42,7 @@ $(document).ready(function () {
     function getWeather(lat, long)  {
         console.log(lat, long)
 
-        fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lat}&exclude={part}&appid=${apiKey}`)
+        fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lat}&exclude={part}&appid=${apiKey}&units=imperial`)
         .then(function(response)    {
             return response.json();
         })
@@ -78,7 +79,7 @@ $(document).ready(function () {
 
     // show previously searched cities in the past city list
     function displayPastCities(city, i)    {
-        if (i<3)    {
+        if (i<4)    {
             const newCity = $('<li>').addClass('past-city-list-item');
             newCity.text(city);
             $pastCityList.append(newCity);
@@ -125,7 +126,7 @@ $(document).ready(function () {
 
     function displayCurrentWeather(allWeather)   {
         const weather = allWeather.weather[0].description;
-        const temp = (allWeather.temp - 273).toFixed(0);
+        const temp = (allWeather.temp).toFixed(0);
         const humidity = allWeather.humidity;
         const windspeed = allWeather.wind_speed;
         const uvIndex = allWeather.uvi;
@@ -157,13 +158,17 @@ $(document).ready(function () {
     }
 
     function displayForecast(allForecastData)  {
+
+        $dayOneWeather.html('');
+
         const dayOne = allForecastData[0];
+        const dayOneUnformatted = currentDay.add(1, 'd').format('MM DD, YYYY');
+        console.log(dayOneUnformatted);
         const dayTwo = allForecastData[1];
         const dayThree = allForecastData[2];
         const dayFour = allForecastData[3];
         const dayFive = allForecastData[4];
 
-        const dayOneUnformatted = currentDay + 1;
         // const dayTwoDate = dateFormat(currentDay + 2);
         // const dayThreeDate = dateFormat(currentDay + 3);
         // const dayFourDate = dateFormat(currentDay + 4);
@@ -171,45 +176,48 @@ $(document).ready(function () {
 
         // const dayOneFormatted = dayOneUnformatted.format('MMMM DD, YYYY');  
 
+
+
         // dayOne display
         let fcweather = dayOne.weather[0].description;
-        let fctemp = (dayOne.temp.day - 273).toFixed(0);
+        let fctemp = (dayOne.temp.day);
+        // .toFixed(0)
 
         // const $dayOneDateDisplay = $("<h3>").text(dayOneDate);.append($dayOneDateDisplay)
         const $dayOneWeatherDisplay = $("<p>").text(fcweather);
-        const $dayOneTempDisplay = $("<p>").text(fctemp);
+        const $dayOneTempDisplay = $("<p>").text(fctemp.day);
 
         $dayOneWeather.append($dayOneWeatherDisplay).append($dayOneTempDisplay);
 
         // dayTwo display
         fcweather = dayTwo.weather[0].description;
-        fctemp = (dayTwo.temp.day - 273).toFixed(0);
+        fctemp = (dayTwo.temp.day);
         const $dayTwoWeatherDisplay = $("<p>").text(fcweather);
-        const $dayTwoTempDisplay = $("<p>").text(fctemp);
+        const $dayTwoTempDisplay = $("<p>").text(fctemp.day);
 
         $dayTwoWeather.append($dayTwoWeatherDisplay).append($dayTwoTempDisplay);
 
         // dayThree display
         fcweather = dayThree.weather[0].description;
-        fctemp = (dayThree.temp.day - 273).toFixed(0);
+        fctemp = (dayThree.temp.day);
         const $dayThreeWeatherDisplay = $("<p>").text(fcweather);
-        const $dayThreeTempDisplay = $("<p>").text(fctemp);
+        const $dayThreeTempDisplay = $("<p>").text(fctemp.day);
 
         $dayThreeWeather.append($dayThreeWeatherDisplay).append($dayThreeTempDisplay);
 
         // dayFour display
         fcweather = dayFour.weather[0].description;
-        fctemp = (dayFour.temp.day - 273).toFixed(0);
+        fctemp = (dayFour.temp.day);
         const $dayFourWeatherDisplay = $("<p>").text(fcweather);
-        const $dayFourTempDisplay = $("<p>").text(fctemp);
+        const $dayFourTempDisplay = $("<p>").text(fctemp.day);
 
         $dayFourWeather.append($dayFourWeatherDisplay).append($dayFourTempDisplay);
 
         // dayFive display
         fcweather = dayFive.weather[0].description;
-        fctemp = (dayFive.temp.day - 273).toFixed(0);
+        fctemp = (dayFive.temp.day);
         const $dayFiveWeatherDisplay = $("<p>").text(fcweather);
-        const $dayFiveTempDisplay = $("<p>").text(fctemp);
+        const $dayFiveTempDisplay = $("<p>").text(fctemp.day);
 
         $dayFiveWeather.append($dayFiveWeatherDisplay).append($dayFiveTempDisplay);
         
@@ -217,16 +225,16 @@ $(document).ready(function () {
     }
 
     function displayMostRecentSearchOnLoad()    {
-        const mostRecentSearchedCity = parsedCitiesFromStorage[0]
-
+        const mostRecentSearchedCity = parsedCitiesFromStorage[0];
         getCity(mostRecentSearchedCity);
     }
 
     $pastCityList.click(function(e)  {
         const thingClicked = e.target;
+        console.log(thingClicked.innerText)
 
         if  (thingClicked.matches('li'))    {
-            const pastCitySelected = thingClicked.val();
+            const pastCitySelected = thingClicked.innerText;
             getCity(pastCitySelected);
         }
     })
@@ -234,9 +242,11 @@ $(document).ready(function () {
     displayDate();
 
     // this function works, but don't turn it on until deploy (limit api pulls)
-    // displayMostRecentSearchOnLoad()
+    displayMostRecentSearchOnLoad()
 
     parsedCitiesFromStorage.forEach(displayPastCities);
+
+    
 
 });
 
